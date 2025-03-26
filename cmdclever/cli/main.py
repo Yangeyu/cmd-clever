@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import sys
+import os
 from agno.utils.pprint import pprint_run_response
 from cmdclever.agent import CmdAgent
 from cmdclever import __version__
@@ -45,6 +46,34 @@ def main():
     )
     
     parser.add_argument(
+        "--no-execute", 
+        help="Disable command execution",
+        action="store_true",
+        default=False
+    )
+    
+    parser.add_argument(
+        "--verbose", 
+        help="Enable verbose mode for debugging",
+        action="store_true",
+        default=False
+    )
+    
+    parser.add_argument(
+        "--save", 
+        help="Save conversation history to a file when exiting",
+        metavar="FILEPATH",
+        default=None
+    )
+    
+    parser.add_argument(
+        "--load", 
+        help="Load conversation history from a file",
+        metavar="FILEPATH",
+        default=None
+    )
+    
+    parser.add_argument(
         "query", 
         nargs="*", 
         help="Query to send to the command agent"
@@ -52,48 +81,113 @@ def main():
     
     args = parser.parse_args()
     
+    # Create the agent
+    try:
+        agent = CmdAgent(
+            api_key=args.api_key,
+            api_base=args.api_base,
+            model_id=args.model_id,
+            verbose=args.verbose
+        )
+        
+        # Load conversation history if specified
+        if args.load:
+            if os.path.exists(args.load):
+                success = agent.load_conversation(args.load)
+                if success:
+                    print(f"Loaded conversation history from {args.load}")
+                else:
+                    print(f"Failed to load conversation history from {args.load}")
+            else:
+                print(f"Conversation history file not found: {args.load}")
+        
+    except Exception as e:
+        print(f"Error initializing agent: {e}", file=sys.stderr)
+        sys.exit(1)
+    
+    # Print welcome message for interactive mode
+    def print_welcome():
+        print("\n" + "=" * 60)
+        print("       CMD-CLEVER - AI-Powered Command Line Assistant")
+        print("=" * 60)
+        print("• Type your questions in Chinese or English")
+        print("• Commands will be formatted with ```execute``` blocks")
+        print("• Commands with ```execute #feedback``` will send output back to AI")
+        print("• You'll be asked to confirm before any command is executed")
+        print("• Type 'exit', 'quit', or '退出' to exit")
+        print("• Working directory:", os.getcwd())
+        if args.verbose:
+            print("• Verbose mode: ENABLED")
+        if args.save:
+            print(f"• Conversation will be saved to: {args.save}")
+        print("=" * 60 + "\n")
+    
     # If no query provided, enter interactive mode
     if not args.query:
-        print("Entering interactive mode. Type 'exit' or 'quit' to exit.")
-        print("Type your command queries in Chinese or English:")
-        print()
+        print_welcome()
         
-        while True:
-            try:
-                query = input("> ")
-                if query.lower() in ("exit", "quit", "退出"):
+        try:
+            while True:
+                try:
+                    query = input("\n> ")
+                    if query.lower() in ("exit", "quit", "退出"):
+                        print("Goodbye!")
+                        break
+                    
+                    if not query.strip():
+                        continue
+                    
+                    # Run the agent with the query
+                    agent.run(
+                        query, 
+                        stream=not args.no_stream, 
+                        execute=not args.no_execute
+                    )
+                    
+                    # No need to print response here as it's already printed in the agent.run method
+                    # This keeps the entire interaction flow in the agent
+                    
+                except KeyboardInterrupt:
+                    print("\nExiting...")
                     break
-                
-                if not query.strip():
-                    continue
-                
-                agent = CmdAgent(
-                    api_key=args.api_key,
-                    api_base=args.api_base,
-                    model_id=args.model_id
-                )
-                
-                result = agent.run(query, stream=not args.no_stream)
-                pprint_run_response(result)
-                print()
-                
-            except KeyboardInterrupt:
-                print("\nExiting...")
-                break
-            except Exception as e:
-                print(f"Error: {e}")
+                except Exception as e:
+                    print(f"Error: {e}")
+            
+            # Save conversation history if specified
+            if args.save:
+                success = agent.save_conversation(args.save)
+                if success:
+                    print(f"Saved conversation history to {args.save}")
+                else:
+                    print(f"Failed to save conversation history to {args.save}")
+                    
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            # Save on Ctrl+C too
+            if args.save:
+                success = agent.save_conversation(args.save)
+                if success:
+                    print(f"Saved conversation history to {args.save}")
+                else:
+                    print(f"Failed to save conversation history to {args.save}")
     else:
         # Process the command-line query
         query = " ".join(args.query)
         try:
-            agent = CmdAgent(
-                api_key=args.api_key,
-                api_base=args.api_base,
-                model_id=args.model_id
+            # Run the agent with the query
+            agent.run(
+                query, 
+                stream=not args.no_stream, 
+                execute=not args.no_execute
             )
             
-            result = agent.run(query, stream=not args.no_stream)
-            pprint_run_response(result)
+            # Save conversation if needed
+            if args.save:
+                success = agent.save_conversation(args.save)
+                if success:
+                    print(f"Saved conversation history to {args.save}")
+                else:
+                    print(f"Failed to save conversation history to {args.save}")
             
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)

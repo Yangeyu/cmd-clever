@@ -1,3 +1,3 @@
-"""Command line tool for generating terminal commands in multiple languages."""
+"""Command line tool for generating and executing terminal commands in multiple languages."""
 
-__version__ = "0.1.0" 
+__version__ = "0.4.0" 
