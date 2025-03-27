@@ -53,6 +53,50 @@ ccc --model gpt-3.5-turbo
 ccc -n
 ```
 
+## Development
+
+### Installation for Development
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/ccc.git
+cd ccc
+
+# Install in development mode
+pip install -e .
+```
+
+### Running Tests
+
+The project uses pytest for testing. To run the tests:
+
+```bash
+# Run all tests
+pytest
+
+# Run tests with verbose output
+pytest -v
+
+# Run a specific test file
+pytest tests/test_cli.py
+
+# Run a specific test
+pytest tests/test_cli.py::test_cli_help_works
+
+# Run tests with coverage report
+pytest --cov=ccc
+```
+
+### Building the Package
+
+```bash
+# Use the build script (recommended)
+./build.sh
+
+# Or build manually
+python -m build
+```
+
 ## License
 
 MIT License 
