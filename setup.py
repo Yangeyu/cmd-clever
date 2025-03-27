@@ -1,11 +1,12 @@
 from setuptools import setup, find_packages
+from ccc import __version__
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="ccc-cli-helper",
-    version="0.1.0",
+    version=__version__,
     author="Yang",
     author_email="your.email@example.com",
     description="A clever command-line assistant powered by AI",
