@@ -50,24 +50,30 @@ def run_interactive_session(agent: CCCAgent, stream: bool = True):
     history = InMemoryHistory()
     session = PromptSession(history=history)
     
-    print(f"CCC v{__version__} - Type 'exit' to quit")
-    print("Type your query and press Enter.")
+    print("\n" + "="*60)
+    print(f"🚀 \033[1;36mCCC v{__version__}\033[0m - \033[1mClever Command-line Companion\033[0m")
+    print("="*60)
+    print("\033[1;32m✓\033[0m AI-powered terminal assistant")
+    print("\033[1;32m✓\033[0m Answers questions & executes commands")
+    print("\033[1;32m✓\033[0m Type 'exit' or press Ctrl+C to quit")
+    print("")
+    print("\033[1;33mType your query and press Enter:\033[0m")
     
     while True:
         try:
-            query = session.prompt('> ')
+            query = session.prompt('>>> ')
 
             if query.lower() in ("exit", "quit", "退出"):
-                print("Goodbye!")
+                print("\n\033[1;32mGoodbye! Have a great day!\033[0m")
                 break
 
             agent.process_query(query, stream=stream)
 
         except KeyboardInterrupt:
-            print("\nExiting...")
+            print("\n\033[1;32mExiting...\033[0m")
             break
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"\033[1;31mError: {e}\033[0m")
 
 def main():
     """Main entry point for CCC"""
@@ -79,10 +85,10 @@ def main():
         agent = CCCAgent(config)
         run_interactive_session(agent, stream=not args.no_stream)
     except KeyboardInterrupt:
-        print("\nExiting...")
+        print("\n\033[1;32mExiting...\033[0m")
         sys.exit(0)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        print(f"\033[1;31mError: {e}\033[0m", file=sys.stderr)
         if args.verbose:
             raise
         sys.exit(1)

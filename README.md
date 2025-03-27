@@ -92,9 +92,24 @@ pytest --cov=ccc
 ```bash
 # Use the build script (recommended)
 ./build.sh
+```
 
+The build script automatically cleans up old files before building:
+- Removes old build directories (`dist/`, `build/`)
+- Cleans all egg-info directories
+- Removes Python cache files (`__pycache__/`, `*.pyc`, etc.)
+- Generates both wheel and source distribution packages
+
+```bash
 # Or build manually
 python -m build
+```
+
+If building manually, you may want to clean old files first:
+```bash
+# Clean before building
+rm -rf dist/ build/ *.egg-info/ __pycache__/ .pytest_cache/
+find . -name "*.pyc" -delete
 ```
 
 ## License
