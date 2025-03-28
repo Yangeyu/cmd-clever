@@ -4,7 +4,6 @@ from agno.agent import Agent
 from agno.models.openai.like import OpenAILike
 from agno.tools.shell import ShellTools
 from agno.tools.duckduckgo import DuckDuckGoTools
-
 from .config import Config
 
 class CCCAgent:
@@ -24,6 +23,7 @@ class CCCAgent:
             instructions=[
                 "You are an expert terminal assistant.",
                 "First try to use search tool to find the answer.",
+                "Important: If user input is start with 'ff', you will translate the text to English.",
             ],
             show_tool_calls=True,
             markdown=True,
